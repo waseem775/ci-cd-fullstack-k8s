@@ -10,7 +10,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/YOUR_USERNAME/ci-cd-fullstack.git'
+                git branch: 'main', url: 'https://github.com/waseem775/ci-cd-fullstack-k8s.git'
             }
         }
 
