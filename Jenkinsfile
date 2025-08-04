@@ -8,6 +8,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/waseem775/ci-cd-fullstack-k8s.git'
@@ -30,7 +31,15 @@ pipeline {
                 dir('backend') {
                     sh '''
                     eval $(minikube docker-env)
-                    docker run --rm $BACKEND_IMAGE php artisan test
+
+                    docker run --rm \
+                      -e APP_NAME=Laravel \
+                      -e APP_ENV=testing \
+                      -e APP_KEY=$(php -r "echo 'base64:'.base64_encode(random_bytes(32));") \
+                      -e APP_DEBUG=true \
+                      -e DB_CONNECTION=sqlite \
+                      -e DB_DATABASE=':memory:' \
+                      $BACKEND_IMAGE php artisan test
                     '''
                 }
             }
