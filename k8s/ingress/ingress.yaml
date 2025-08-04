@@ -5,6 +5,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: nginx
   rules:
     - host: laravel.local
       http:
@@ -25,4 +26,4 @@ spec:
               service:
                 name: react-frontend
                 port:
-                  number: 3000
+                  number: 80   # ✅ Correct: matches service.port

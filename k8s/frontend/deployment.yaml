@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: react
-          image: react-frontend:latest        # Local image
-          imagePullPolicy: Never              # Use local Docker image built in Minikube
+          image: react-frontend:latest
+          imagePullPolicy: Never
           ports:
-            - containerPort: 80               # NGINX exposes port 80
+            - containerPort: 80

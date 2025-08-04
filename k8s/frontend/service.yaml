@@ -7,5 +7,5 @@ spec:
     app: react-frontend
   ports:
     - protocol: TCP
-      port: 3000
-      targetPort: 80
+      port: 80            # exposed for ingress
+      targetPort: 80      # since NGINX serves on 80 now
