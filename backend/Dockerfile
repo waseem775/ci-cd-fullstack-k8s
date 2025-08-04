@@ -2,18 +2,27 @@
 
 FROM php:8.2-fpm
 
+# Install PHP extensions
 RUN apt-get update && apt-get install -y \
     git zip unzip curl libzip-dev \
     && docker-php-ext-install pdo pdo_mysql zip
 
+# Install Composer globally
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 👉 Create Laravel in subfolder to avoid conflict with build context
-RUN composer create-project laravel/laravel /var/www/laravel
-
+# Set working directory inside the container
 WORKDIR /var/www/laravel
 
-RUN chown -R www-data:www-data /var/www/laravel && chmod -R 755 /var/www/laravel
+# Copy project files from the host into the container
+COPY . .
+
+# Install Laravel dependencies
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+
+# Set permissions for storage & bootstrap/cache
+RUN chown -R www-data:www-data /var/www/laravel \
+    && chmod -R 755 /var/www/laravel/storage \
+    && chmod -R 755 /var/www/laravel/bootstrap/cache
 
 EXPOSE 8000
 

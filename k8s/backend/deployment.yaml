@@ -14,10 +14,13 @@ spec:
     spec:
       containers:
         - name: laravel
-          image: laravel-backend:latest
+          image: laravel-backend:latest     # Built inside Minikube
+          imagePullPolicy: Never
           ports:
             - containerPort: 8000
           env:
+            - name: DB_CONNECTION
+              value: mysql
             - name: DB_HOST
               value: mysql
             - name: DB_PORT

@@ -2,22 +2,25 @@ pipeline {
     agent any
 
     environment {
-        BACKEND_IMAGE = "laravel-backend:latest"
-        FRONTEND_IMAGE = "react-frontend:latest"
+        BACKEND_IMAGE = 'laravel-backend:latest'
+        FRONTEND_IMAGE = 'react-frontend:latest'
+        KUBE_CONFIG = '/home/jenkins/.kube/config'
     }
 
     stages {
-
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/waseem775/ci-cd-fullstack-k8s.git'
+                git url: 'https://github.com/waseem775/ci-cd-fullstack-k8s.git'
             }
         }
 
         stage('Build Laravel Backend') {
             steps {
                 dir('backend') {
-                    sh 'docker build -t $BACKEND_IMAGE .'
+                    sh '''
+                    eval $(minikube docker-env)
+                    docker build -t $BACKEND_IMAGE .
+                    '''
                 }
             }
         }
@@ -26,7 +29,8 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
-                        docker run --rm $BACKEND_IMAGE php artisan test
+                    eval $(minikube docker-env)
+                    docker run --rm $BACKEND_IMAGE php artisan test
                     '''
                 }
             }
@@ -35,7 +39,10 @@ pipeline {
         stage('Build React Frontend') {
             steps {
                 dir('frontend') {
-                    sh 'docker build -t $FRONTEND_IMAGE .'
+                    sh '''
+                    eval $(minikube docker-env)
+                    docker build -t $FRONTEND_IMAGE .
+                    '''
                 }
             }
         }
@@ -43,10 +50,15 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
-                    kubectl apply -f k8s/mysql/
-                    kubectl apply -f k8s/backend/
-                    kubectl apply -f k8s/frontend/
-                    kubectl apply -f k8s/ingress/
+                eval $(minikube docker-env)
+
+                kubectl delete ingress laravel-ingress --ignore-not-found
+                kubectl delete ingress project-ingress --ignore-not-found
+
+                kubectl apply -f k8s/mysql/
+                kubectl apply -f k8s/backend/
+                kubectl apply -f k8s/frontend/
+                kubectl apply -f k8s/ingress/
                 '''
             }
         }
@@ -54,7 +66,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ Deployment successful!'
+            echo '✅ CI/CD pipeline completed successfully!'
         }
         failure {
             echo '❌ Build or deployment failed!'
